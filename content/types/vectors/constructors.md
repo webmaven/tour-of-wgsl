@@ -54,7 +54,7 @@ Vectors have three kinds of constructors:
 
    </details>
 
-   If an constructor argument is a vector, then the elements of that vector are used as if they were passed separately.
+   If a constructor argument is a vector, then the elements of that vector are used as if they were passed separately.
 
    <details class='example'>
      <summary>Example</summary>

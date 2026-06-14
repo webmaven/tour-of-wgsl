@@ -4,7 +4,7 @@ shader: ./must-use.wgsl
 ---
 
 A function with a return type may be marked with the `@must_use` attribute, which makes it a
-compile time error if there a statement that is *just* a call to that function.
+compile time error if there is a statement that is *just* a call to that function.
 
 In other words, the value resulting from calling that function must be *used* for some purpose:
 * in a larger expression,

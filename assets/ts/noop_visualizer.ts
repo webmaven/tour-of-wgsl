@@ -9,7 +9,7 @@
 
 import VisualizerBuilder, { VisualizerError, CompilationFailure, Visualizer } from './visualizer';
 
-export class NoopVizualizer implements Visualizer {
+export class NoopVisualizer implements Visualizer {
   readonly executeFrequency = 'once';
 
   readonly output: 'none' = 'none';
@@ -17,7 +17,7 @@ export class NoopVizualizer implements Visualizer {
   execute() {}
 }
 
-export default class NoopVizualizationBuilder implements VisualizerBuilder {
+export default class NoopVisualizerBuilder implements VisualizerBuilder {
   device: GPUDevice | null = null;
 
   /**
@@ -48,11 +48,7 @@ export default class NoopVizualizationBuilder implements VisualizerBuilder {
       code: shader,
     });
 
-    // getCompilationInfo() was previously called compilationInfo().
-    // TODO: Just use shaderModule.getCompilationInfo() after May 2023.
-    const compilationInfo = shaderModule.getCompilationInfo
-      ? await shaderModule.getCompilationInfo()
-      : await (shaderModule as any).compilationInfo();
+    const compilationInfo = await shaderModule.getCompilationInfo();
     if (compilationInfo.messages.length !== 0) {
       throw new CompilationFailure(
         compilationInfo.messages.map((m: any) => ({
@@ -64,6 +60,6 @@ export default class NoopVizualizationBuilder implements VisualizerBuilder {
         }))
       );
     }
-    return new NoopVizualizer();
+    return new NoopVisualizer();
   }
 }

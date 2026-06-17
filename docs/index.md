@@ -33,7 +33,15 @@ exploration.
 > return value from 1 to 0, so it's `vec4(0, sin(f32(frame) / 128), 0, 1)`.
 > What happens?
 
-The tour is organized into sections:
+The tour is organized into the following sections:
+
+- **[Types](types/index.md)**: Explore the wide variety of types supported by WGSL, from basic scalars and vectors to structures and pointers.
+- **[Variables & Constants](variables/index.md)**: Learn how to declare and use mutable variables (`var`) and immutable values (`const`, `override`, `let`).
+- **[Expressions](expressions/index.md)**: Understand operators and different evaluation stages (constant, override, runtime).
+- **[Control Flow](control-flow/index.md)**: Learn about branching and looping statements (`if`, `switch`, `loop`, `while`, `for`).
+- **[Functions](functions/index.md)**: Explore function syntax, calls, the `@must_use` attribute, and entry points.
+- **[Binding Points](binding-points/index.md)**: See how shaders connect to CPU-side resources like buffers and textures using binding points and attributes.
+- **[Uniformity Analysis](uniformity-analysis/index.md)**: Understand how WGSL tracks uniformity of execution for derivative and barrier safety.
 
 Each section has several sub-pages, and you can navigate forward
 and backward using the buttons on the bottom of each page, or by using the

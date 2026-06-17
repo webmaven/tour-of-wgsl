@@ -7,8 +7,8 @@
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "build": "vite build && ./venv/bin/mkdocs build",
-    "serve": "vite build && ./venv/bin/mkdocs serve",
+    "build": "vite build && mkdocs build",
+    "serve": "vite build && mkdocs serve",
     "docs": "typedoc",
     "lint": "eslint .",
     "format": "prettier --write .",

@@ -141,7 +141,7 @@ function layoutColumns(lhs: string[], rhs: string[]): string[] {
   });
 }
 
-export class ValueVizualizer implements Visualizer {
+export class ValueVisualizer implements Visualizer {
   device: GPUDevice;
   outputText: HTMLElement;
   outputFields: OutputFields;
@@ -260,7 +260,7 @@ export class ValueVizualizer implements Visualizer {
   }
 }
 
-export default class ValueVizualizerBuilder implements VisualizerBuilder {
+export default class ValueVisualizerBuilder implements VisualizerBuilder {
   outputFields: OutputFields;
   outputText: HTMLElement | null = null;
   device: GPUDevice | null = null;
@@ -268,7 +268,7 @@ export default class ValueVizualizerBuilder implements VisualizerBuilder {
   constructor(options: string) {
     if (options === null) {
       throw new VisualizerError(
-        "ValueVizualizerBuilder requires the JSON options: {'fields': [{'expr': 'value', 'type': 'i32'}, ...]}'"
+        "ValueVisualizerBuilder requires the JSON options: {'fields': [{'expr': 'value', 'type': 'i32'}, ...]}'"
       );
     }
     const config = JSON.parse(options) as {
@@ -346,11 +346,7 @@ fn main() {
       code: shader,
     });
 
-    // getCompilationInfo() was previously called compilationInfo().
-    // TODO: Just use shaderModule.getCompilationInfo() after May 2023.
-    const compilationInfo = shaderModule.getCompilationInfo
-      ? await shaderModule.getCompilationInfo()
-      : await (shaderModule as any).compilationInfo();
+    const compilationInfo = await shaderModule.getCompilationInfo();
     if (compilationInfo.messages.length !== 0) {
       this.outputText.innerHTML = '';
       throw new CompilationFailure(
@@ -393,7 +389,7 @@ fn main() {
       ],
     });
 
-    return new ValueVizualizer(
+    return new ValueVisualizer(
       this.device,
       this.outputText,
       this.outputFields,

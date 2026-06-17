@@ -9,7 +9,7 @@
 
 import VisualizerBuilder, { VisualizerError, CompilationFailure, Visualizer } from './visualizer';
 
-export class GraphicsVizualizer implements Visualizer {
+export class GraphicsVisualizer implements Visualizer {
   device: GPUDevice;
   context: GPUCanvasContext;
   pipeline: GPURenderPipeline;
@@ -69,7 +69,7 @@ export class GraphicsVizualizer implements Visualizer {
   }
 }
 
-export default class GraphicsVizualizerBuilder implements VisualizerBuilder {
+export default class GraphicsVisualizerBuilder implements VisualizerBuilder {
   device: GPUDevice | null = null;
   context: GPUCanvasContext | null = null;
 
@@ -124,11 +124,7 @@ export default class GraphicsVizualizerBuilder implements VisualizerBuilder {
       code: shader,
     });
 
-    // getCompilationInfo() was previously called compilationInfo().
-    // TODO: Just use shaderModule.getCompilationInfo() after May 2023.
-    const compilationInfo = shaderModule.getCompilationInfo
-      ? await shaderModule.getCompilationInfo()
-      : await (shaderModule as any).compilationInfo();
+    const compilationInfo = await shaderModule.getCompilationInfo();
     if (compilationInfo.messages.length !== 0) {
       throw new CompilationFailure(
         compilationInfo.messages.map((m: any) => ({
@@ -197,7 +193,7 @@ export default class GraphicsVizualizerBuilder implements VisualizerBuilder {
       ],
     });
 
-    return new GraphicsVizualizer(
+    return new GraphicsVisualizer(
       this.device,
       this.context,
       pipeline,

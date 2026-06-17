@@ -28,7 +28,6 @@ jobs:
 
     env:
       id: ${{ github.event.workflow_run.id }}
-      HUGO_VERSION: 0.111.3
 
     steps:
       - name: 'Download artifact'

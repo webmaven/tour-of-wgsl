@@ -1,5 +1,5 @@
 ---
-title: 'var<storage>'
+title: 'var&lt;storage&gt;'
 shader: ./var-storage.wgsl
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: 'var<uniform>'
+title: 'var&lt;uniform&gt;'
 shader: ./var-uniform.wgsl
 ---
 

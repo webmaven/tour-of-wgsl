@@ -2,8 +2,7 @@
  * Copyright 2023 The Tour of WGSL Authors
  *
  * Use of this source code is governed by a BSD-style
- * license that can be found in the LICENSE file or at
- * https://developers.google.com/open-source/licenses/bsd
+ * license that can be found in the LICENSE file.
  */
 
 /// <reference types="@webgpu/types" />
@@ -19,7 +18,7 @@ export class GraphicsVizualizer implements Visualizer {
 
   readonly executeFrequency = 'repeat';
 
-  readonly output: 'canvas';
+  readonly output: 'canvas' = 'canvas';
 
   constructor(
     device: GPUDevice,
@@ -132,7 +131,7 @@ export default class GraphicsVizualizerBuilder implements VisualizerBuilder {
       : await (shaderModule as any).compilationInfo();
     if (compilationInfo.messages.length !== 0) {
       throw new CompilationFailure(
-        compilationInfo.messages.map((m) => ({
+        compilationInfo.messages.map((m: any) => ({
           line: m.lineNum,
           column: m.linePos,
           length: m.length,

@@ -2,134 +2,128 @@
  * Copyright 2023 The Tour of WGSL Authors
  *
  * Use of this source code is governed by a BSD-style
- * license that can be found in the LICENSE file or at
- * https://developers.google.com/open-source/licenses/bsd
+ * license that can be found in the LICENSE file.
  */
-
-/**
- * The WGSL-Tour web component is responsible for displaying the UI for a the shaders, and result
- * canvas. The tour contains the `Runner` and will call the runner to initialize and
- * generate frames
- *
- * @module wgsl-tour
- */
-
-/// <reference types="@types/codemirror" />
 
 import VisualizerBuilder, { CompilationFailure, VisualizerError, Visualizer } from './visualizer';
-
-import CodeMirror from 'codemirror';
-import '../third_party/codemirror/wgsl-mode';
 import WGSLDocs from './wgsl-docs';
+import { EditorView, basicSetup } from 'codemirror';
+import { EditorState } from '@codemirror/state';
+import { hoverTooltip } from '@codemirror/view';
+import { wgsl } from '@iizukak/codemirror-lang-wgsl';
+import { syntaxTree } from '@codemirror/language';
+import { lintGutter, setDiagnostics, Diagnostic } from '@codemirror/lint';
 
-/**
- * Primary component for the WGSL Tour. Renders the editor, and results
- */
 export class WGSLTour extends HTMLElement {
-  /** The `Visualization` which renders the frames */
   visualization: Visualizer | undefined = undefined;
-
-  /** The `VisualizationBuilder` which builds the visualization */
   visualizationBuilder: VisualizerBuilder | undefined = undefined;
-
-  /**
-   * Non-visible, non-editable shader source that combined with user shader code
-   * before compiling the shader
-   */
   bootstrap: string = '';
-
-  /** The code editor */
-  editor: CodeMirror.Editor;
-
-  /** The diagnostic messages in the editor */
-  diagnostics: Array<CodeMirror.LineWidget>;
-
-  /** The visualization output HTML elements */
-  output: HTMLElement;
-
-  /** The current frame number to be rendered */
+  editor!: EditorView;
+  output!: HTMLElement;
   frame_number: number = 0;
-
-  /** The keyboard callback delay timer */
   key_timer: ReturnType<typeof setTimeout> | undefined = undefined;
 
-  /** Creates the wgsl-tour */
   constructor() {
     super();
   }
 
   connectedCallback() {
-    const tmplNode = document.getElementById('wgsl-tour-tmpl') as HTMLTemplateElement;
-    const tmpl = tmplNode.content.cloneNode(true);
     const shadow = this.attachShadow({ mode: 'open' });
-    shadow.appendChild(tmpl);
 
-    const textarea = shadow.getElementById('wgsl-shader') as HTMLTextAreaElement;
-    textarea.value = this.textContent || '';
+    const style = document.createElement('style');
+    style.textContent = `
+      :host {
+        display: block;
+      }
+      canvas,
+      #wgsl-tour-output-canvas,
+      #wgsl-tour-output-text {
+        width: 100%;
+        max-width: 640px;
+        margin-top: 10px;
+        display: block;
+      }
+      #wgsl-tour-output-canvas {
+        height: 480px;
+      }
+      #canvas {
+        display: flex;
+        justify-content: center;
+        align-items: start;
+      }
+      .cm-editor {
+        border: 1px solid var(--md-default-fg-color--lite, #e2e8f0);
+        height: 350px;
+        border-radius: 4px;
+      }
+      .wgsl-tooltip {
+        border-radius: 5px;
+        margin: 0;
+        margin-left: 2px;
+        padding: 4px;
+        border: 1px solid #14b8a6;
+        overflow: auto;
+        background-color: var(--md-code-bg-color, #f8fafc);
+        color: var(--md-code-fg-color, #0f172a);
+      }
+    `;
+    shadow.appendChild(style);
 
-    this.diagnostics = [];
+    const editorContainer = document.createElement('div');
+    editorContainer.className = 'editor-container';
+    shadow.appendChild(editorContainer);
 
-    let rebuild = () => {
+    this.output = document.createElement('div');
+    this.output.setAttribute('id', 'output');
+    shadow.appendChild(this.output);
+
+    const pre = this.querySelector('#tour-content');
+    const code = (pre ? pre.textContent : this.textContent) || '';
+
+    const rebuild = () => {
       this.frame_number = 0;
       if (this.visualizationBuilder) {
         this.buildVisualization();
       }
     };
 
-    this.editor = CodeMirror.fromTextArea(textarea, {
-      autofocus: false,
-      lineNumbers: true,
-      mode: 'wgsl',
-      dragDrop: false,
-      spellcheck: false,
-      autocorrect: false,
-      autocapitalize: false,
-    });
-    this.editor.setOption('extraKeys', {
-      'Ctrl-O': function (cm) {
-        let cursor = cm.getCursor();
-        var token = cm.getTokenAt(cursor);
-        let docs = WGSLDocs.getDocsFor(token.string, token.type);
-
-        if (docs === undefined) {
-          return;
-        }
-        var msg = document.createElement('pre');
-        msg.innerHTML = docs;
-        msg.className = 'wgsl-tooltip';
-        let tooltip = this.editor.addLineWidget(cursor.line, msg, {
-          coverGutter: false,
-          noHScroll: false,
-        });
-
-        let listener = () => {
-          tooltip.clear();
-          document.removeEventListener('keydown', listener);
-        };
-        setTimeout(() => {
-          document.addEventListener('keydown', listener);
-        }, 100);
-      }.bind(this),
+    const docsTooltip = hoverTooltip((view, pos, side) => {
+      const tree = syntaxTree(view.state);
+      const token = tree.resolveInner(pos, side);
+      const text = view.state.sliceDoc(token.from, token.to);
+      const docs = WGSLDocs.getDocsFor(text, token.name);
+      if (!docs) return null;
+      return {
+        pos: token.from,
+        end: token.to,
+        above: true,
+        create() {
+          const dom = document.createElement('div');
+          dom.className = 'wgsl-tooltip';
+          dom.innerHTML = `<pre>${docs}</pre>`;
+          return { dom };
+        },
+      };
     });
 
-    this.editor.on('changes', () => {
-      if (this.key_timer !== undefined) {
-        clearTimeout(this.key_timer);
+    const updateListener = EditorView.updateListener.of((update) => {
+      if (update.docChanged) {
+        if (this.key_timer !== undefined) clearTimeout(this.key_timer);
+        this.key_timer = setTimeout(rebuild, 1000);
       }
-      this.key_timer = setTimeout(rebuild, 1000);
     });
 
-    this.output = shadow.getElementById('output');
+    this.editor = new EditorView({
+      doc: code,
+      extensions: [basicSetup, wgsl(), lintGutter(), docsTooltip, updateListener],
+      parent: editorContainer,
+    });
   }
 
   setBootstrap(src: string) {
     this.bootstrap = src;
   }
 
-  /**
-   * Sets the runner for the tour
-   * @param val the runner to set
-   **/
   async setVisualizationBuilder(val: VisualizerBuilder) {
     this.visualizationBuilder = val;
     try {
@@ -137,35 +131,31 @@ export class WGSLTour extends HTMLElement {
         throw new VisualizerError('WebGPU is not supported in this browser');
       }
       await this.visualizationBuilder.configure(this.output);
-    } catch (e) {
-      this.onPipelineFailure({ message: e } as VisualizerError);
+    } catch (e: any) {
+      this.onPipelineFailure({ message: e.message || e.toString() } as VisualizerError);
       return false;
     }
 
     this.buildVisualization();
+    return true;
   }
 
-  /**
-   * Initializes the runner and starts generating frames
-   */
   buildVisualization() {
-    if (!this.visualizationBuilder) {
-      return;
-    }
-    this.editor.getAllMarks().forEach((m) => m.clear());
-    this.diagnostics.forEach((d) => d.clear());
+    if (!this.visualizationBuilder) return;
 
+    this.editor.dispatch(setDiagnostics(this.editor.state, []));
     this.visualization = undefined;
+
     this.visualizationBuilder
-      .build(this.editor.getValue() + this.bootstrap)
+      .build(this.editor.state.doc.toString() + this.bootstrap)
       .then((visualization) => {
         this.visualization = visualization;
-        requestAnimationFrame(this.frame.bind(this));
+        requestAnimationFrame(() => this.frame());
       })
-      .catch((err: Error) => {
+      .catch((err: any) => {
         if (err.hasOwnProperty('diagnostics')) {
           this.onCompilationFailure(err as CompilationFailure);
-        } else if (err.hasOwnProperty('visualizer_error')) {
+        } else if (err.hasOwnProperty('visualizer_error') || err.message) {
           this.onPipelineFailure(err as VisualizerError);
         } else {
           console.log(err);
@@ -173,59 +163,40 @@ export class WGSLTour extends HTMLElement {
       });
   }
 
-  /**
-   * Renders a single frame
-   */
   frame() {
-    if (this.visualization === undefined) {
-      return;
-    }
+    if (this.visualization === undefined) return;
 
     this.frame_number++;
     this.visualization.execute(this.frame_number);
 
     if (this.visualization.executeFrequency === 'repeat') {
-      requestAnimationFrame(this.frame.bind(this));
+      requestAnimationFrame(() => this.frame());
     }
   }
 
-  /**
-   * Shader compilation failure handler.
-   */
   onCompilationFailure(failure: CompilationFailure) {
-    for (const diag of failure.diagnostics) {
-      if (diag.kind === 'error') {
-        this.editor.markText(
-          { line: diag.line - 1, ch: diag.column - 1 },
-          { line: diag.line - 1, ch: diag.column - 1 + diag.length },
-          { startStyle: 'wgsl-inline-error' }
-        );
-      }
-
-      var msg = document.createElement('pre');
-      msg.appendChild(document.createTextNode(diag.msg));
-      msg.className = 'wgsl-compile wgsl-' + diag.kind;
-
-      this.diagnostics.push(
-        this.editor.addLineWidget(diag.line - 1, msg, {
-          coverGutter: false,
-          noHScroll: true,
-        })
-      );
-    }
+    const diagnostics: Diagnostic[] = failure.diagnostics.map((diag) => {
+      const lineInfo = this.editor.state.doc.line(diag.line);
+      const from = lineInfo.from + Math.max(0, diag.column - 1);
+      const to = Math.min(from + (diag.length || 1), lineInfo.to);
+      return {
+        from,
+        to,
+        severity: diag.kind === 'error' ? 'error' : 'warning',
+        message: diag.msg,
+      };
+    });
+    this.editor.dispatch(setDiagnostics(this.editor.state, diagnostics));
   }
 
-  /**
-   * Shader pipeline compilation faiure handler
-   */
   onPipelineFailure(failure: VisualizerError) {
-    var msg = document.createElement('pre');
-    msg.appendChild(document.createTextNode(failure.message));
-    msg.className = 'wgsl-compile wgsl-error';
-
-    this.diagnostics.push(
-      this.editor.addLineWidget(0, msg, { coverGutter: false, above: true, noHScroll: true })
-    );
+    const diag: Diagnostic = {
+      from: 0,
+      to: 0,
+      severity: 'error',
+      message: failure.message,
+    };
+    this.editor.dispatch(setDiagnostics(this.editor.state, [diag]));
   }
 }
 customElements.define('wgsl-tour', WGSLTour);

@@ -2,21 +2,17 @@
  * Copyright 2023 The Tour of WGSL Authors
  *
  * Use of this source code is governed by a BSD-style
- * license that can be found in the LICENSE file or at
- * https://developers.google.com/open-source/licenses/bsd
+ * license that can be found in the LICENSE file.
  */
 
 export default class WGSLDocs {
-  static callbacks = {
-    intrinsic: this.intrinsicDocs.bind(this),
-    'variable-3': this.var3.bind(this),
-    meta: this.meta.bind(this),
-  };
-
   static getDocsFor(name: string, type: string) {
-    if (this.callbacks.hasOwnProperty(type)) {
-      return this.callbacks[type](name);
-    }
+    if (this.intrinsics.hasOwnProperty(name))
+      return this.intrinsics[name as keyof typeof this.intrinsics];
+    if (this.predeclared_names.hasOwnProperty(name))
+      return this.predeclared_names[name as keyof typeof this.predeclared_names];
+    if (this.attributes.hasOwnProperty(name))
+      return this.attributes[name as keyof typeof this.attributes];
     return undefined;
   }
 
@@ -1107,7 +1103,7 @@ operations in the workgroup address space.`,
 
   static intrinsicDocs(name: string) {
     if (this.intrinsics.hasOwnProperty(name)) {
-      return this.intrinsics[name];
+      return this.intrinsics[name as keyof typeof WGSLDocs.intrinsics];
     }
     return undefined;
   }
@@ -1258,7 +1254,7 @@ Order in memory (b, g, r, a)`,
 
   static var3(name: string) {
     if (this.predeclared_names.hasOwnProperty(name)) {
-      return this.predeclared_names[name];
+      return this.predeclared_names[name as keyof typeof WGSLDocs.predeclared_names];
     }
     return undefined;
   }
@@ -1297,7 +1293,7 @@ The x value is required, y, z are optional, defaulting to 1.`,
 
   static meta(name: string) {
     if (this.attributes.hasOwnProperty(name)) {
-      return this.attributes[name];
+      return this.attributes[name as keyof typeof WGSLDocs.attributes];
     }
     return undefined;
   }

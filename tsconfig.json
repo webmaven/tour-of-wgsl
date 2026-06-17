@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "outDir": "resources/js",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "target": "es2020",
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -12,33 +11,20 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noEmit": true,
-    "lib": [
-      "es2020",
-      "dom"
-    ],
-    "typeRoots": [
-      "./node_modules/@webgpu/types",
-      "./node_modules/@types"
-    ]
+    "lib": ["es2020", "dom"],
+    "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"]
   },
-  "include": [
-    "prettier.config.toml",
-    "assets/ts/**/*.ts",
-    "assets/third_party/codemirror/wgsl-mode.js"
-  ],
+  "include": ["assets/ts/**/*.ts"],
   "typedocOptions": {
     "treatWarningsAsErrors": true,
     "treatValidationWarningsAsErrors": true,
     "entryPointStrategy": "expand",
-    "entryPoints": [
-      "assets/ts/",
-      "content/"
-    ],
+    "entryPoints": ["assets/ts/"],
     "excludeInternal": false,
     "excludeProtected": true,
     "excludePrivate": true,
     "excludeNotDocumentedKinds": [],
-    "out": "docs/",
+    "out": "docs/typedoc",
     "requiredToBeDocumented": [
       "Enum",
       "EnumMember",

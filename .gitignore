@@ -1,6 +1,7 @@
 .hugo_build.lock
 node_modules
-docs
+docs/assets/
+site/
 resources
 jsconfig.json
 public

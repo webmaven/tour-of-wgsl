@@ -2,8 +2,7 @@
  * Copyright 2023 The Tour of WGSL Authors
  *
  * Use of this source code is governed by a BSD-style
- * license that can be found in the LICENSE file or at
- * https://developers.google.com/open-source/licenses/bsd
+ * license that can be found in the LICENSE file.
  */
 
 /// <reference types="@webgpu/types" />
@@ -355,7 +354,7 @@ fn main() {
     if (compilationInfo.messages.length !== 0) {
       this.outputText.innerHTML = '';
       throw new CompilationFailure(
-        compilationInfo.messages.map((m) => ({
+        compilationInfo.messages.map((m: any) => ({
           line: m.lineNum,
           column: m.linePos,
           length: m.length,

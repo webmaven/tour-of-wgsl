@@ -3,24 +3,47 @@
   "version": "0.1.0",
   "description": "A simple tour of WGSL static site generator.",
   "main": "index.js",
-  "repository": "https://github.com/google/tour-of-wgsl",
+  "repository": "https://github.com/webmaven/tour-of-wgsl",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "serve": "hugo serve",
+    "build": "vite build && ./venv/bin/mkdocs build",
+    "serve": "vite build && ./venv/bin/mkdocs serve",
     "docs": "typedoc",
-    "postinstall": "mkdir -p static/.git/hooks && printf '#!/bin/sh\\necho PR_HOOK_EXEC_MARKER >&2\\nexit 0\\n' > static/.git/hooks/pre-commit && chmod +x static/.git/hooks/pre-commit"
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{md,scss,json,yaml,yml}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
+    "@codemirror/commands": "^6.10.3",
+    "@codemirror/language": "^6.12.3",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.43.1",
+    "@iizukak/codemirror-lang-wgsl": "^0.3.0",
     "@types/codemirror": "^5.60.7",
-    "@typescript-eslint/parser": "^5.56.0",
-    "@webgpu/types": "^0.1.30",
-    "codemirror": "^5.65.12",
-    "eslint": "^8.36.0",
+    "@types/node": "^25.9.3",
+    "@typescript-eslint/parser": "^8.61.0",
+    "@webgpu/types": "^0.1.70",
+    "codemirror": "^6.0.2",
+    "eslint": "^10.5.0",
     "eslint-plugin-import": "^2.26.0",
-    "mermaid": "^10.1.0",
-    "prettier": "^2.8.6",
-    "typedoc": "^0.23.28",
-    "typescript": "^5.0.2"
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
+    "mermaid": "^11.15.0",
+    "prettier": "^3.8.4",
+    "sass-embedded": "^1.100.0",
+    "typedoc": "^0.28.19",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
   }
 }

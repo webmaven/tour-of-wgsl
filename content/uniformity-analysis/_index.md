@@ -1,5 +1,0 @@
----
-title: "Uniformity Analysis"
----
-
-{{< pages >}}

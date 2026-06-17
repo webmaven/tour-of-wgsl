@@ -2,8 +2,7 @@
  * Copyright 2023 The Tour of WGSL Authors
  *
  * Use of this source code is governed by a BSD-style
- * license that can be found in the LICENSE file or at
- * https://developers.google.com/open-source/licenses/bsd
+ * license that can be found in the LICENSE file.
  */
 
 /// <reference types="@webgpu/types" />
@@ -13,7 +12,7 @@ import VisualizerBuilder, { VisualizerError, CompilationFailure, Visualizer } fr
 export class NoopVizualizer implements Visualizer {
   readonly executeFrequency = 'once';
 
-  readonly output: 'none';
+  readonly output: 'none' = 'none';
 
   execute() {}
 }
@@ -56,7 +55,7 @@ export default class NoopVizualizationBuilder implements VisualizerBuilder {
       : await (shaderModule as any).compilationInfo();
     if (compilationInfo.messages.length !== 0) {
       throw new CompilationFailure(
-        compilationInfo.messages.map((m) => ({
+        compilationInfo.messages.map((m: any) => ({
           line: m.lineNum,
           column: m.linePos,
           length: m.length,

@@ -5,6 +5,8 @@ shader: ./index.wgsl
 visualizer: /ts/graphics_visualizer.ts
 ---
 
+<!-- Force pages rebuild -->
+
 # Welcome to the tour of WGSL
 
 This site is a quick introduction to the [WebGPU Shading

@@ -8,10 +8,11 @@ This repository contains the source code for the Tour of WGSL (WebGPU Shading La
 
 - **Static Site Generator**: MkDocs (Python-based)
 - **Theme & Formatting**: MkDocs Material Theme
-- **Assets & Bundling**: Vite (compiles TypeScript to compiled JS in `docs/assets/`)
-- **Scripting**: TypeScript
-- **Linting & Formatting**: ESLint and Prettier
-- **CI/CD**: GitHub Actions and GitHub Pages
+- **Mathematical Rendering**: MathJax v3 & `pymdownx.arithmatex` (enables LaTeX math with `\(...\)` and `\[...\]` delimiters)
+- **Interactive Visualizers**: WebGPU visualizers written in TypeScript, using **CodeMirror 6** (with `@iizukak/codemirror-lang-wgsl`) for live editing
+- **Assets & Bundling**: Vite (compiles TypeScript and SCSS/CSS into compiled assets in `docs/assets/`)
+- **Scripting**: TypeScript (ESLint & Prettier)
+- **CI/CD**: GitHub Actions (using modern checkout@v4, setup-node@v4, setup-python@v5, configure-pages@v5 to avoid deprecated Node environments) and GitHub Pages deployment
 
 ## Directory Structure
 
